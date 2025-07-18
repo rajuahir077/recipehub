@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login - RecipeHub</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+</head>
+<body class="auth-body">
+  <!-- Background Floating Emojis -->
+  <div class="auth-bg">
+    <span class="bg-emoji" style="--x: 10%; --y: 20%; --delay: 0s">🍔</span>
+    <span class="bg-emoji" style="--x: 80%; --y: 30%; --delay: 1s">🍜</span>
+    <span class="bg-emoji" style="--x: 20%; --y: 70%; --delay: 2s">🥘</span>
+    <span class="bg-emoji" style="--x: 90%; --y: 80%; --delay: 3s">🍰</span>
+  </div>
+
+  <!-- Login Form Container -->
+  <div class="auth-container">
+    <div class="auth-card">
+      <!-- Header Logo & Welcome Text -->
+      <div class="auth-header">
+        <div class="logo">
+          <span class="logo-icon">🍳</span>
+          <span class="logo-text">RecipeHub</span>
+        </div>
+        <h1 class="auth-title">Welcome Back!</h1>
+        <p class="auth-subtitle">Sign in to your account and continue cooking</p>
+      </div>
+
+      <!-- Login Form -->
+      <form class="auth-form" id="loginForm">
+        <div class="form-group">
+          <label for="email" class="form-label">Email Address</label>
+          <div class="input-container">
+            <span class="input-icon">📧</span>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              class="form-input"
+              placeholder="your@email.com"
+              required
+            />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="password" class="form-label">Password</label>
+          <div class="input-container">
+            <span class="input-icon">🔒</span>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              class="form-input"
+              placeholder="Enter your password"
+              required
+            />
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-large btn-full">
+          Sign In ✨
+        </button>
+      </form>
+
+      <!-- Auth Footer -->
+      <div class="auth-footer">
+        <p class="auth-link-text">
+          Don't have an account? 
+          <a href="signup.html" class="auth-link">Create one here</a>
+        </p>
+        <div class="auth-divider"><span>or</span></div>
+        <a href="index.html" class="btn btn-outline btn-full">Back to Home 🏠</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Backend Login Script -->
+  <script>
+    document.getElementById("loginForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+
+      try {
+        const response = await fetch("http://localhost:3000/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          alert("✅ Login successful! Welcome " + result.user.fullName);
+          window.location.href = "dashboard.html";
+        } else {
+          alert("❌ " + result.error);
+        }
+      } catch (error) {
+        console.error("Login error:", error);
+        alert("❌ An error occurred during login.");
+      }
+    });
+  </script>
+</body>
+</html>

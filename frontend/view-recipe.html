@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>View Recipe - RecipeHub</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <header class="header">
+    <div class="container">
+      <div class="nav">
+        <div class="logo">
+          <span class="logo-icon">🍳</span>
+          <span class="logo-text">RecipeHub</span>
+        </div>
+        <div class="nav-buttons">
+          <a href="dashboard.html" class="btn btn-outline">← Back to Dashboard</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="recipe-view">
+    <div class="container" id="recipeContainer">
+      <h1 class="page-title">Loading recipe...</h1>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <p>Made with ❤️ RecipeHub</p>
+    </div>
+  </footer>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const recipeId = params.get("id");
+
+    async function loadRecipe() {
+      try {
+        const res = await fetch(`http://localhost:3000/recipes/${recipeId}`);
+        const recipe = await res.json();
+
+        if (!res.ok) {
+          document.getElementById("recipeContainer").innerHTML = `<p class="error">${recipe.error || 'Recipe not found.'}</p>`;
+          return;
+        }
+
+        const container = document.getElementById("recipeContainer");
+
+        container.innerHTML = `
+          <h1 class="page-title">${recipe.title}</h1>
+
+          <img src="http://localhost:3000${recipe.image_url}" alt="${recipe.title}" class="recipe-image" style="max-width: 100%; border-radius: 12px; margin-bottom: 20px;"/>
+
+          <div class="meta" style="margin-bottom: 10px;">
+            <span class="tag">📂 ${recipe.category}</span>
+            <span class="tag">⏱ ${recipe.prep_time} min</span>
+            <span class="tag">🍽 Serves: ${recipe.servings}</span>
+          </div>
+
+          <p class="description" style="margin-bottom: 25px;">${recipe.description}</p>
+
+          <h2>📜 Ingredients</h2>
+          <ul class="ingredients-list" style="margin-bottom: 20px;">
+            ${
+              Array.isArray(recipe.ingredients) && recipe.ingredients.length > 0
+                ? recipe.ingredients.map(i => `<li>🟢 ${i}</li>`).join('')
+                : "<li style='color: gray;'>No ingredients listed.</li>"
+            }
+          </ul>
+
+          <h2>👨‍🍳 Instructions</h2>
+          <ol class="instructions-list">
+            ${
+              Array.isArray(recipe.instructions) && recipe.instructions.length > 0
+                ? recipe.instructions.map(step => `<li>✅ ${step}</li>`).join('')
+                : "<li style='color: gray;'>No instructions provided.</li>"
+            }
+          </ol>
+        `;
+      } catch (err) {
+        document.getElementById("recipeContainer").innerHTML = `<p class="error">An error occurred while loading recipe.</p>`;
+        console.error(err);
+      }
+    }
+
+    loadRecipe();
+  </script>
+</body>
+</html>

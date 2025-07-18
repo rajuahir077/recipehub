@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Edit Recipe - RecipeHub</title>
+  <link rel="stylesheet" href="style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+<header class="header">
+  <div class="container">
+    <div class="nav">
+      <div class="logo">
+        <span class="logo-icon">🍳</span>
+        <span class="logo-text">RecipeHub</span>
+      </div>
+      <div class="nav-buttons">
+        <a href="dashboard.html" class="btn btn-outline">← Back to Dashboard</a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="add-recipe">
+  <div class="container">
+    <h1>Edit Your Recipe 🍽️</h1>
+
+    <form class="recipe-form" enctype="multipart/form-data">
+      <input type="text" id="title" class="form-input" placeholder="Recipe Title" required/>
+
+      <select id="category" class="form-select" required>
+        <option value="">Select Category</option>
+        <option value="breakfast">🍳 Breakfast</option>
+        <option value="lunch">🥗 Lunch</option>
+        <option value="dinner">🍽️ Dinner</option>
+        <option value="dessert">🍰 Dessert</option>
+        <option value="snacks">🍿 Snacks</option>
+        <option value="drinks">🥤 Drinks</option>
+      </select>
+
+      <input type="number" id="prepTime" class="form-input" placeholder="Prep Time (min)"/>
+      <input type="number" id="servings" class="form-input" placeholder="Servings"/>
+
+      <textarea id="description" class="form-textarea" rows="3" placeholder="Description"></textarea>
+
+      <input type="file" id="image" class="form-input" accept="image/*"/>
+      <img id="imagePreview" style="max-width:200px;margin-top:10px;"/>
+
+      <h3>Ingredients</h3>
+      <div id="ingredients"></div>
+      <button type="button" class="btn btn-outline" onclick="addIngredient()">+ Ingredient</button>
+
+      <h3>Instructions</h3>
+      <div id="instructions"></div>
+      <button type="button" class="btn btn-outline" onclick="addStep()">+ Step</button>
+
+      <button type="submit" class="btn btn-success">Update Recipe ✅</button>
+    </form>
+  </div>
+</main>
+
+<script>
+// URL Params
+const urlParams = new URLSearchParams(window.location.search);
+const recipeId = urlParams.get('id');
+
+async function loadRecipe(){
+  try {
+    const res = await fetch(`http://localhost:3000/recipes/${recipeId}`);
+    if (!res.ok) {
+      const errMsg = await res.json();
+      alert(errMsg.error || 'Failed to load recipe.');
+      return;
+    }
+
+    const recipe = await res.json();
+
+    document.getElementById('title').value = recipe.title;
+    document.getElementById('category').value = recipe.category;
+    document.getElementById('prepTime').value = recipe.prep_time;
+    document.getElementById('servings').value = recipe.servings;
+    document.getElementById('description').value = recipe.description;
+
+    document.getElementById('imagePreview').src = recipe.image_url;
+
+    document.getElementById('ingredients').innerHTML = '';
+    recipe.ingredients.forEach(ing => addIngredient(ing));
+
+    document.getElementById('instructions').innerHTML = '';
+    recipe.instructions.forEach(ins => addStep(ins));
+
+  } catch (err) {
+    alert('An error occurred while loading the recipe.');
+    console.error(err);
+  }
+}
+
+function addIngredient(value=''){
+  const container=document.getElementById('ingredients');
+  const div=document.createElement('div');
+  div.innerHTML=`<input type='text' class='form-input ingredient-input' value="${value}"/>`;
+  container.appendChild(div);
+}
+
+function addStep(value=''){
+  const container=document.getElementById('instructions');
+  const div=document.createElement('div');
+  div.innerHTML=`<textarea class='form-textarea step-input' rows='2'>${value}</textarea>`;
+  container.appendChild(div);
+}
+
+document.getElementById('image').addEventListener('change', e=>{
+  document.getElementById('imagePreview').src=URL.createObjectURL(e.target.files[0]);
+});
+
+document.querySelector('.recipe-form').addEventListener('submit',async e=>{
+  e.preventDefault();
+  const formData=new FormData();
+  formData.append('title',document.getElementById('title').value);
+  formData.append('category',document.getElementById('category').value);
+  formData.append('prepTime',document.getElementById('prepTime').value);
+  formData.append('servings',document.getElementById('servings').value);
+  formData.append('description',document.getElementById('description').value);
+  const image=document.getElementById('image').files[0];
+  if(image) formData.append('image',image);
+
+  const ingredients=[...document.querySelectorAll('.ingredient-input')].map(i=>i.value);
+  formData.append('ingredients',JSON.stringify(ingredients));
+  const instructions=[...document.querySelectorAll('.step-input')].map(i=>i.value);
+  formData.append('instructions',JSON.stringify(instructions));
+
+  const res=await fetch(`http://localhost:3000/recipes/${recipeId}`,{
+    method:'PUT', body:formData
+  });
+
+  if(res.ok){
+    alert('✅ Recipe updated!');
+    location.href='dashboard.html';
+  }else alert('Failed to update recipe.');
+});
+
+// Initial load
+loadRecipe();
+</script>
+
+<footer class="footer">
+  <div class="container">
+    <p>Made with ❤️ RecipeHub</p>
+  </div>
+</footer>
+</body>
+</html>

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign Up - RecipeHub</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+</head>
+<body class="auth-body">
+
+  <!-- Background Emojis -->
+  <div class="auth-bg">
+    <span class="bg-emoji" style="--x: 15%; --y: 15%; --delay: 0s">🥑</span>
+    <span class="bg-emoji" style="--x: 85%; --y: 25%; --delay: 1s">🍕</span>
+    <span class="bg-emoji" style="--x: 10%; --y: 80%; --delay: 2s">🧁</span>
+    <span class="bg-emoji" style="--x: 80%; --y: 70%; --delay: 3s">🥗</span>
+  </div>
+
+  <!-- Signup Form Container -->
+  <div class="auth-container">
+    <div class="auth-card">
+
+      <!-- Header -->
+      <div class="auth-header">
+        <div class="logo">
+          <span class="logo-icon">🍳</span>
+          <span class="logo-text">RecipeHub</span>
+        </div>
+        <h1 class="auth-title">Join RecipeHub!</h1>
+        <p class="auth-subtitle">Create your account and start sharing recipes</p>
+      </div>
+
+      <!-- Signup Form -->
+      <form class="auth-form" id="signupForm">
+        <div class="form-group">
+          <label for="fullName" class="form-label">Full Name</label>
+          <div class="input-container">
+            <span class="input-icon">👤</span>
+            <input type="text" id="fullName" name="fullName" class="form-input" placeholder="Your full name" required />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="email" class="form-label">Email Address</label>
+          <div class="input-container">
+            <span class="input-icon">📧</span>
+            <input type="email" id="email" name="email" class="form-input" placeholder="your@email.com" required />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="password" class="form-label">Password</label>
+          <div class="input-container">
+            <span class="input-icon">🔒</span>
+            <input type="password" id="password" name="password" class="form-input" placeholder="Create a password" required />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="confirmPassword" class="form-label">Confirm Password</label>
+          <div class="input-container">
+            <span class="input-icon">🔒</span>
+            <input type="password" id="confirmPassword" name="confirmPassword" class="form-input" placeholder="Confirm your password" required />
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-success btn-large btn-full">Create Account 🎉</button>
+      </form>
+
+      <!-- Footer -->
+      <div class="auth-footer">
+        <p class="auth-link-text">
+          Already have an account? 
+          <a href="login.html" class="auth-link">Sign in here</a>
+        </p>
+        <div class="auth-divider"><span>or</span></div>
+        <a href="index.html" class="btn btn-outline btn-full">Back to Home 🏠</a>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    document.getElementById("signupForm").addEventListener("submit", async function (e) {
+      e.preventDefault();
+
+      const fullName = document.getElementById("fullName").value.trim();
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
+      const confirmPassword = document.getElementById("confirmPassword").value;
+
+      if (password !== confirmPassword) {
+        alert("Passwords do not match!");
+        return;
+      }
+
+      const user = { fullName, email, password };
+
+      try {
+        const response = await fetch("http://localhost:3000/signup", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(user),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          alert("Account created successfully!");
+          window.location.href = "login.html";
+        } else {
+          alert(data.error || "Signup failed.");
+        }
+      } catch (err) {
+        console.error("Signup error:", err);
+        alert("An error occurred while signing up.");
+      }
+    });
+  </script>
+</body>
+</html>

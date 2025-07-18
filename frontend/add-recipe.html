@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Add Recipe - RecipeHub</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="container">
+      <div class="nav">
+        <div class="logo">
+          <span class="logo-icon">🍳</span>
+          <span class="logo-text">RecipeHub</span>
+        </div>
+        <div class="nav-buttons">
+          <a href="dashboard.html" class="btn btn-outline">← Back to Dashboard</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Add Recipe Form -->
+  <main class="add-recipe">
+    <div class="container">
+      <div class="add-recipe-header">
+        <h1 class="page-title">Share Your Recipe 🍳</h1>
+        <p class="page-subtitle">Help others discover your delicious creation!</p>
+      </div>
+
+      <form class="recipe-form" enctype="multipart/form-data">
+        <div class="form-section">
+          <h2 class="form-section-title">Basic Information</h2>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="title" class="form-label">Recipe Name *</label>
+              <input type="text" id="title" name="title" class="form-input" required placeholder="e.g., Grandma's Cookies">
+            </div>
+            <div class="form-group">
+              <label for="category" class="form-label">Category *</label>
+              <select id="category" name="category" class="form-select" required>
+                <option value="">Choose a category</option>
+                <option value="breakfast">🍳 Breakfast</option>
+                <option value="lunch">🥗 Lunch</option>
+                <option value="dinner">🍽️ Dinner</option>
+                <option value="dessert">🍰 Dessert</option>
+                <option value="snacks">🍿 Snacks</option>
+                <option value="drinks">🥤 Drinks</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="prepTime" class="form-label">Prep Time (minutes)</label>
+              <input type="number" id="prepTime" name="prepTime" class="form-input" placeholder="30">
+            </div>
+            <div class="form-group">
+              <label for="servings" class="form-label">Servings</label>
+              <input type="number" id="servings" name="servings" class="form-input" placeholder="4">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="description" class="form-label">Description</label>
+            <textarea id="description" name="description" class="form-textarea" rows="3" placeholder="A brief description of your recipe..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="image" class="form-label">Upload Image</label>
+            <input type="file" id="image" name="image" accept="image/*" class="form-input">
+            <img id="imagePreview" style="margin-top:10px; max-width: 200px; display:none;" />
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h2 class="form-section-title">Ingredients</h2>
+          <p class="form-section-subtitle">List all ingredients needed</p>
+          <div class="ingredients-container" id="ingredients">
+            <div class="ingredient-item">
+              <input type="text" class="form-input ingredient-input" placeholder="e.g., 1 cup flour" />
+              <button type="button" class="btn-remove" onclick="removeIngredient(this)">❌</button>
+            </div>
+          </div>
+          <button type="button" class="btn btn-outline btn-add" onclick="addIngredient()">+ Add Ingredient</button>
+        </div>
+
+        <div class="form-section">
+          <h2 class="form-section-title">Instructions</h2>
+          <p class="form-section-subtitle">Step-by-step cooking instructions</p>
+          <div class="steps-container" id="instructions">
+            <div class="step-item">
+              <div class="step-number">1</div>
+              <textarea class="form-textarea step-input" rows="2" placeholder="e.g., Mix ingredients together"></textarea>
+              <button type="button" class="btn-remove" onclick="removeStep(this)">❌</button>
+            </div>
+          </div>
+          <button type="button" class="btn btn-outline btn-add" onclick="addStep()">+ Add Step</button>
+        </div>
+
+        <div class="form-actions">
+          <a href="dashboard.html" class="btn btn-outline btn-large">Cancel</a>
+          <button type="submit" class="btn btn-success btn-large">Share Recipe 🎉</button>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-logo">
+          <span class="logo-icon">🍳</span>
+          <span class="logo-text">RecipeHub</span>
+        </div>
+        <p>Made with ❤️ for food lovers everywhere</p>
+      </div>
+    </div>
+  </footer>
+
+<script>
+  function addIngredient() {
+    const container = document.getElementById("ingredients");
+    const newItem = document.createElement("div");
+    newItem.className = "ingredient-item";
+    newItem.innerHTML = `
+      <input type="text" class="form-input ingredient-input" placeholder="e.g., 1 tbsp sugar" />
+      <button type="button" class="btn-remove" onclick="removeIngredient(this)">❌</button>`;
+    container.appendChild(newItem);
+  }
+
+  function removeIngredient(button) {
+    const container = document.getElementById("ingredients");
+    if (container.children.length > 1) {
+      button.parentElement.remove();
+    }
+  }
+
+  function addStep() {
+    const container = document.getElementById("instructions");
+    const stepNumber = container.children.length + 1;
+    const newItem = document.createElement("div");
+    newItem.className = "step-item";
+    newItem.innerHTML = `
+      <div class="step-number">${stepNumber}</div>
+      <textarea class="form-textarea step-input" rows="2" placeholder="Describe this step..."></textarea>
+      <button type="button" class="btn-remove" onclick="removeStep(this)">❌</button>`;
+    container.appendChild(newItem);
+  }
+
+  function removeStep(button) {
+    const container = document.getElementById("instructions");
+    if (container.children.length > 1) {
+      button.parentElement.remove();
+      Array.from(container.children).forEach((step, index) => {
+        step.querySelector(".step-number").textContent = index + 1;
+      });
+    }
+  }
+
+  document.getElementById("image").addEventListener("change", function () {
+    const preview = document.getElementById("imagePreview");
+    const file = this.files[0];
+    if (file) {
+      preview.src = URL.createObjectURL(file);
+      preview.style.display = "block";
+    } else {
+      preview.style.display = "none";
+    }
+  });
+
+  document.querySelector(".recipe-form").addEventListener("submit", async function (e) {
+    e.preventDefault();
+
+    const formData = new FormData();
+    formData.append("title", document.getElementById("title").value.trim());
+    formData.append("category", document.getElementById("category").value);
+    formData.append("prepTime", parseInt(document.getElementById("prepTime").value) || 0);
+    formData.append("servings", parseInt(document.getElementById("servings").value) || 0);
+    formData.append("description", document.getElementById("description").value.trim());
+
+    const imageFile = document.getElementById("image").files[0];
+    if (imageFile) formData.append("image", imageFile);
+
+    const ingredients = Array.from(document.querySelectorAll(".ingredient-input"))
+      .map(input => input.value.trim()).filter(Boolean);
+    const instructions = Array.from(document.querySelectorAll(".step-input"))
+      .map(input => input.value.trim()).filter(Boolean);
+
+    formData.append("ingredients", JSON.stringify(ingredients));
+    formData.append("instructions", JSON.stringify(instructions));
+
+    try {
+      const response = await fetch("http://localhost:3000/recipes", {
+        method: "POST",
+        body: formData
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        alert("✅ Recipe submitted successfully!");
+        window.location.href = "dashboard.html";
+      } else {
+        alert(data.error || "Failed to submit recipe.");
+      }
+    } catch (err) {
+      console.error("Error submitting recipe:", err);
+      alert("An error occurred. Please try again.");
+    }
+  });
+</script>
+
+</body>
+</html>

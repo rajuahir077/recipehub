@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Categories - RecipeHub</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    .selected-category-title {
+      font-size: 2rem;
+      font-weight: bold;
+      margin-top: 20px;
+      color: #333;
+      text-align: center;
+    }
+    .category-icon-big {
+      font-size: 3rem;
+      display: block;
+      margin-bottom: 10px;
+    }
+    .recipe-card-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 30px;
+      justify-content: center;
+      margin-top: 40px;
+    }
+    .recipe-card {
+      background-color: #fff;
+      border-radius: 20px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+      width: 320px;
+      padding: 20px;
+      text-align: center;
+    }
+    .recipe-card img {
+      width: 100%;
+      border-radius: 15px;
+      margin-bottom: 15px;
+    }
+    .recipe-card h3 {
+      font-size: 1.5rem;
+      margin-bottom: 10px;
+    }
+    .recipe-card p {
+      font-size: 1rem;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="container">
+      <div class="nav">
+        <div class="logo">
+          <span class="logo-icon">🍳</span>
+          <span class="logo-text">RecipeHub</span>
+        </div>
+        <div class="nav-buttons">
+          <a href="dashboard.html" class="btn btn-outline">← Back to Dashboard</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Category Display -->
+  <section class="categories">
+    <div class="container">
+      <h2 class="section-title">Recipe Categories 🍽️</h2>
+      <p class="section-subtitle">Explore delicious recipes by category</p>
+
+      <!-- Selected Category Output -->
+      <div id="selected-category" class="selected-category-title"></div>
+
+      <!-- Recipe card container -->
+      <div id="recipe-card-container" class="recipe-card-container"></div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-logo">
+          <span class="logo-icon">🍳</span>
+          <span class="logo-text">RecipeHub</span>
+        </div>
+        <p>Made with ❤️ for food lovers everywhere</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Script to Load Selected Category -->
+  <script>
+    const categoryMap = {
+      breakfast: {
+        name: "Breakfast",
+        emoji: "🍳",
+        image: "assets/Fluffy Pancakes.jpg",
+        title: "Fluffy Pancakes",
+        description: "Perfect weekend breakfast with maple syrup and fresh berries."
+      },
+      lunch: {
+        name: "Lunch",
+        emoji: "🥗",
+        image: "assets/Chicken Caesar Salad.jpg",
+        title: "Chicken Caesar Salad",
+        description: "Fresh crispy salad with grilled chicken and homemade dressing."
+      },
+      dinner: {
+        name: "Dinner",
+        emoji: "🍽️",
+        image: "assets/Pasta Primavera.jpg",
+        title: "Pasta Primavera",
+        description: "Fresh vegetables and creamy sauce with perfectly cooked pasta."
+      },
+      dessert: {
+        name: "Desserts",
+        emoji: "🍰",
+        image: "assets/Chocolate Lava Cake.jpg",
+        title: "Chocolate Lava Cake",
+        description: "Rich chocolate cake with molten center. Perfect for special occasions."
+      },
+      snacks: {
+        name: "Snacks",
+        emoji: "🍿",
+        image: "assets/Tropical Smoothie Bowl.jpg",
+        title: "Tropical Smoothie Bowl",
+        description: "Refreshing smoothie bowl with mango, banana and coconut flakes."
+      },
+      drinks: {
+        name: "Drinks",
+        emoji: "🥤",
+        image: "assets/Fresh Mango Juice.jpg",
+        title: "Fresh Mango Juice",
+        description: "Chilled mango juice served with mint leaves and ice."
+      }
+    };
+
+    const params = new URLSearchParams(window.location.search);
+    const type = params.get("type");
+    const selectedCategoryDiv = document.getElementById("selected-category");
+    const recipeCardContainer = document.getElementById("recipe-card-container");
+
+    if (type) {
+      if (categoryMap[type]) {
+        const category = categoryMap[type];
+        selectedCategoryDiv.innerHTML = `<span class="category-icon-big">${category.emoji}</span>${category.name}`;
+        recipeCardContainer.innerHTML = `
+          <div class="recipe-card">
+            <img src="${category.image}" alt="${category.title}" />
+            <h3>${category.title}</h3>
+            <p>${category.description}</p>
+          </div>
+        `;
+      } else {
+        selectedCategoryDiv.innerHTML = `Category not found.`;
+        recipeCardContainer.innerHTML = '';
+      }
+    } else {
+      // No type param, show all categories
+      selectedCategoryDiv.innerHTML = 'All Categories';
+      recipeCardContainer.innerHTML = Object.entries(categoryMap).map(([key, cat]) => `
+        <div class="recipe-card">
+          <img src="${cat.image}" alt="${cat.title}" />
+          <h3>${cat.title}</h3>
+          <p>${cat.description}</p>
+        </div>
+      `).join('');
+    }
+  </script>
+</body>
+</html>
