@@ -80,7 +80,7 @@ Then, use the provided SQL to create the users and recipes tables.
 
 1. Clone the repository:
 
-git clone https://github.com/YOUR_USERNAME/recipehub.git
+git clone https://github.com/rajuahir077/recipehub.git
 
 2. Install backend dependencies:
 
