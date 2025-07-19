@@ -180,14 +180,14 @@ Here’s an example of a valid recipe input:
 🖥️ Screenshots (To be added manually on GitHub)
 
 Add relevant screenshots of:
-
-Signup page
-
-Add recipe form
-
-Dashboard with recipes
-
-Category-wise view
+1. Dashboard
+2. Sign Up
+3. Sign In
+4. Popular Recipes
+5. Community Recipes
+6. Categories
+7. Share Recipe
+8. All Categories
 
 ---
 
