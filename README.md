@@ -35,22 +35,7 @@ Password Security: bcrypt
 
 📁 Folder Structure
 
-RecipeHub/
-├── backend/
-│   ├── server.js
-│   ├── uploads/
-│   └── (image files uploaded via Multer)
-├── frontend/
-│   ├── index.html
-│   ├── login.html
-│   ├── signup.html
-│   ├── dashboard.html
-│   ├── add-recipe.html
-│   ├── edit-recipe.html
-│   ├── category.html
-│   ├── script.js
-│   └── style.css
-├── README.md
+<pre> <code>```bash RecipeHub/ ├── backend/ │ └── server.js │ └── uploads/ # image files uploaded via Multer ├── frontend/ │ ├── index.html │ ├── login.html │ ├── signup.html │ ├── dashboard.html │ ├── add-recipe.html │ ├── edit-recipe.html │ ├── category.html │ ├── script.js │ └── style.css ├── README.md ├── package.json ``` </code> </pre>
 
 ---
 
