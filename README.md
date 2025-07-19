@@ -1,137 +1,192 @@
-🍳 RecipeHub – Share Your Favorite Recipes
-RecipeHub is a web-based application that allows users to share, browse, edit, and delete recipes. Built with HTML, CSS, JavaScript, Node.js, Express, and MySQL, it features dynamic forms, image uploads, user authentication, and category browsing.
-
----
+📋 RecipeHub – Your Personal Recipe Sharing App
+RecipeHub is a full-stack web application that allows users to share, browse, edit, and manage recipes. Built using Node.js, Express, MySQL, and HTML/CSS/JS, it’s perfect for food lovers who want to create and explore a diverse collection of recipes.
 
 🚀 Features
 
-✨ Add, edit, and delete your own recipes with dynamic ingredient/step forms
+✅ User Registration & Login (with password hashing)
 
-👥 User signup and login (with secure password hashing using bcrypt)
+🍳 Add your own recipes with images
 
-📂 Upload recipe images (stored locally)
+📂 Explore popular recipe categories
 
-🍱 Browse recipes by category (e.g., Breakfast, Lunch, Dinner, etc.)
+✏️ Edit and delete your recipes
 
-📋 View recipe details on a separate page
+📸 Upload recipe images (stored locally)
 
-🎨 Colorful, responsive frontend layout (fun, vibrant UI)
+📱 Responsive UI design
+
+📊 Community recipe dashboard
 
 ---
 
 🛠️ Tech Stack
 
-Frontend: HTML, CSS, JavaScript
+Frontend: HTML, CSS (custom styled), JavaScript
 
-Backend: Node.js, Express
+Backend: Node.js, Express.js
 
-Database: MySQL (using MySQL Workbench)
+Database: MySQL
 
-File Uploads: multer (for storing recipe images)
+Image Uploads: Multer (saved to /uploads/)
 
 Password Security: bcrypt
 
 ---
 
 📁 Folder Structure
-perl
 
 RecipeHub/
 ├── backend/
-│   ├── uploads/                # Uploaded recipe images
-│   ├── server.js               # Main backend server file
-│   ├── package.json            # Backend dependencies
-│   ├── package-lock.json
-│
+│   ├── server.js
+│   ├── uploads/
+│   └── (image files uploaded via Multer)
 ├── frontend/
-│   ├── assets/                 # Logo/images used in UI
-│   ├── add-recipe.html         # Add new recipe page
-│   ├── category.html           # Browse by category
-│   ├── dashboard.html          # Community & popular recipes
-│   ├── edit-recipe.html        # Edit existing recipe
-│   ├── index.html              # Homepage
-│   ├── login.html              # User login
-│   ├── signup.html             # User signup
-│   ├── view-recipe.html        # View full recipe
-│   ├── style.css               # Custom responsive styling
-│   └── script.js               # Dynamic ingredient/step functionality
-│
-├── README.md                   # Project overview (this file)
-└── RecipeHub.code-workspace    # VS Code workspace file
+│   ├── index.html
+│   ├── login.html
+│   ├── signup.html
+│   ├── dashboard.html
+│   ├── add-recipe.html
+│   ├── edit-recipe.html
+│   ├── category.html
+│   ├── script.js
+│   └── style.css
+├── README.md
 
 ---
 
 🔐 MySQL Configuration
 
-Before running the backend, update the database connection credentials inside server.js:
+Ensure your MySQL credentials are configured correctly inside backend/server.js:
 
 
 const db = mysql.createConnection({
   host: 'localhost',
-  user: 'root',                // ← MySQL username
-  password: '03062001@Raju',   // ← MySQL password
+  user: 'root',
+  password: '03062001@Raju',
   database: 'recipehub'
 });
 
-Ensure your MySQL Server and MySQL Workbench are running, and that the database recipehub is created.
+✅ You must create a database in MySQL Workbench:
+
+CREATE DATABASE recipehub;
+
+Then, use the provided SQL to create the users and recipes tables.
 
 ---
 
 📦 Installation & Setup
-Clone the repository (or download ZIP & extract):
 
-bash
+1. Clone the repository:
 
-git clone https://github.com/your-rajuahir077/recipehub.git
-Navigate to the backend folder:
+git clone https://github.com/YOUR_USERNAME/recipehub.git
 
-bash
+2. Install backend dependencies:
 
-cd RecipeHub/backend
-Install dependencies:
-
-bash
-
+cd recipehub/backend
 npm install
-Start the backend server:
 
-bash
+3. Start the server:
 
 node server.js
-Open your browser and go to:
 
-arduino
 
-http://localhost:3000
+4. Open your frontend files directly in the browser (e.g. dashboard.html) or use Live Server in VS Code.
 
 ---
 
-🧪 Test Cases
+🎯 Usage
 
-✅ User Authentication
-Sign up with full name, email, and password → gets stored in MySQL
+Register a user account from the signup page
 
-Login with correct credentials → redirected to dashboard
+Login with your credentials
 
-Invalid credentials → error message shown
+Add new recipes with dynamic ingredients & steps
 
-Already registered email → signup error
+View, update, or delete your recipes from the dashboard
 
-Unauthorized page access → redirects to login
+Browse recipes by category from the homepage
 
-✅ Recipe Management
-Add a recipe → includes image upload and dynamic fields
+---
 
-View full recipe → shows description, image, ingredients, steps
 
-Edit recipe → pre-fills data and allows updates
+✅ Test Cases
 
-Delete recipe → instantly removes it from the database
+🔐 User Authentication
 
-✅ Frontend Navigation
-Homepage with categories → clickable navigation
+TC1: Signup with valid credentials → User created
 
-Dashboard → shows 6 fixed popular + community recipes
+TC2: Signup with existing email → Error message
 
-Category page → filters recipes by selected type
+TC3: Login with valid credentials → Dashboard access
 
+TC4: Login with wrong credentials → Error shown
+
+TC5: Access dashboard without login → Should restrict access
+
+TC6: Logout → Session ends, redirect to login
+
+🍽️ Recipe Management
+
+TC1: Add recipe with title, description, image → Displays in dashboard
+
+TC2: Add ingredients/steps dynamically → All values stored in database
+
+TC3: Edit recipe → Changes reflected immediately
+
+TC4: Delete recipe → Removed from dashboard and DB
+
+TC5: Upload recipe without image → Still allowed (optional)
+
+---
+
+📂 Category & Community
+
+TC1: Click category on homepage → Recipes filtered properly
+
+TC2: Recipes show with images and metadata → All loaded dynamically
+
+TC3: If no recipe exists for a category → Message displayed
+
+---
+
+🧪 Sample Data
+
+Here’s an example of a valid recipe input:
+
+{
+  "title": "Paneer Butter Masala",
+  "category": "Dinner",
+  "prepTime": "30 minutes",
+  "servings": "2",
+  "description": "Delicious North Indian curry with paneer.",
+  "ingredients": ["Paneer", "Tomato", "Butter", "Spices"],
+  "instructions": ["Heat butter", "Add tomatoes", "Add paneer", "Cook"]
+}
+
+---
+
+🖥️ Screenshots (To be added manually on GitHub)
+
+Add relevant screenshots of:
+
+Signup page
+
+Add recipe form
+
+Dashboard with recipes
+
+Category-wise view
+
+---
+
+🧠 Reflection (For Report)
+
+Developed in multiple iterations with debugging and UI testing.
+
+Adapted from original conception idea: added image upload and edit/delete options.
+
+Used MySQL over MongoDB due to familiarity and structured schema.
+
+Faced difficulty with dynamic fields but solved via script.js.
+
+Backend errors debugged using terminal logs and trial-and-error testing.
