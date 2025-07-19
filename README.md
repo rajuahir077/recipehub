@@ -116,7 +116,6 @@ Browse recipes by category from the homepage
 
 ---
 
-
 ✅ Test Cases
 
 🔐 User Authentication
@@ -132,6 +131,7 @@ TC4: Login with wrong credentials → Error shown
 TC5: Access dashboard without login → Should restrict access
 
 TC6: Logout → Session ends, redirect to login
+
 
 
 
