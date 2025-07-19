@@ -127,6 +127,8 @@ TC5: Access dashboard without login → Should restrict access
 
 TC6: Logout → Session ends, redirect to login
 
+
+
 🍽️ Recipe Management
 
 TC1: Add recipe with title, description, image → Displays in dashboard
@@ -155,6 +157,7 @@ TC3: If no recipe exists for a category → Message displayed
 
 Here’s an example of a valid recipe input:
 
+```json
 {
   "title": "Paneer Butter Masala",
   "category": "Dinner",
@@ -164,6 +167,7 @@ Here’s an example of a valid recipe input:
   "ingredients": ["Paneer", "Tomato", "Butter", "Spices"],
   "instructions": ["Heat butter", "Add tomatoes", "Add paneer", "Cook"]
 }
+```
 
 ---
 
