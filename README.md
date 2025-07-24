@@ -1,6 +1,12 @@
 📋 RecipeHub – Your Personal Recipe Sharing App
+---
 RecipeHub is a full-stack web application that allows users to share, browse, edit, and manage recipes. Built using Node.js, Express, MySQL, and HTML/CSS/JS, it’s perfect for food lovers who want to create and explore a diverse collection of recipes.
 
+---
+
+![Dashboard Screenshot](Screenshots/Dashboard.png)
+
+---
 🚀 Features
 
 ✅ User Registration & Login (with password hashing)
@@ -110,7 +116,6 @@ Browse recipes by category from the homepage
 
 ---
 
-
 ✅ Test Cases
 
 🔐 User Authentication
@@ -126,6 +131,7 @@ TC4: Login with wrong credentials → Error shown
 TC5: Access dashboard without login → Should restrict access
 
 TC6: Logout → Session ends, redirect to login
+
 
 
 
@@ -174,14 +180,14 @@ Here’s an example of a valid recipe input:
 🖥️ Screenshots (To be added manually on GitHub)
 
 Add relevant screenshots of:
-
-Signup page
-
-Add recipe form
-
-Dashboard with recipes
-
-Category-wise view
+1. Dashboard
+2. Sign Up
+3. Sign In
+4. Popular Recipes
+5. Community Recipes
+6. Categories
+7. Share Recipe
+8. All Categories
 
 ---
 
