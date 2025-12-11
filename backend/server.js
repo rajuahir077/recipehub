@@ -1,3 +1,4 @@
+// backend/server.js
 const express = require('express');
 const cors = require('cors');
 const mysql = require('mysql2');
@@ -6,13 +7,13 @@ const multer = require('multer');
 const path = require('path');
 
 const app = express();
-const port = process.env.PORT || 3000; // use Render port in production
+const port = process.env.PORT || 3000; // Render provides a port in production
 
 app.use(cors());
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Configure Multer for image uploads (works locally; note: Render's filesystem is ephemeral)
+// Multer (image uploads) - note: Render filesystem is ephemeral
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, 'uploads/');
@@ -25,19 +26,20 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 // ---------- DATABASE CONNECTION ----------
-// Prefer DB_URL from environment (set this in Render -> Environment Variables).
-// Fallback to local connection for development.
-const dbUrl = process.env.DB_URL;
+// Production: set MYSQL_URL environment variable to your Railway connection string.
+// Example value (Railway public network): mysql://root:password@shuttle.proxy.rlwy.net:44117/railway
+const mysqlUrl = process.env.MYSQL_URL;
 
 let db;
-if (dbUrl) {
-  db = mysql.createConnection(dbUrl);
-  console.log('Using DB_URL from environment.');
+if (mysqlUrl) {
+  db = mysql.createConnection(mysqlUrl);
+  console.log('Using MYSQL_URL from environment.');
 } else {
+  // Fallback to your local MySQL (development)
   db = mysql.createConnection({
     host: 'localhost',
     user: 'root',
-    password: '03062001@Raju',
+    password: '03062001@Raju', // local password - keep it local and do not push secrets to GitHub
     database: 'recipehub'
   });
   console.log('Using local MySQL config.');
@@ -94,10 +96,9 @@ app.post('/recipes', upload.single('image'), (req, res) => {
     (err, result) => {
       if (err) {
         console.error('❌ Error inserting recipe:', err);
-        res.status(500).json({ error: 'Internal server error' });
-      } else {
-        res.json({ message: '✅ Recipe added successfully!', id: result.insertId });
+        return res.status(500).json({ error: 'Internal server error' });
       }
+      res.json({ message: '✅ Recipe added successfully!', id: result.insertId });
     }
   );
 });
@@ -109,15 +110,12 @@ app.post('/signup', async (req, res) => {
     return res.status(400).json({ error: 'All fields are required.' });
   }
 
-  const full_name = fullName;
-
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
-
     db.query(
       'INSERT INTO users (full_name, email, password) VALUES (?, ?, ?)',
-      [full_name, email, hashedPassword],
-      (err, result) => {
+      [fullName, email, hashedPassword],
+      (err) => {
         if (err) {
           console.error('❌ Signup error:', err);
           return res.status(500).json({ error: 'Email already exists or other error.' });
@@ -144,7 +142,7 @@ app.post('/login', (req, res) => {
       return res.status(500).json({ error: 'Internal server error' });
     }
 
-    if (results.length === 0) {
+    if (!results || results.length === 0) {
       return res.status(401).json({ error: 'Invalid email or password.' });
     }
 
@@ -164,9 +162,7 @@ app.post('/login', (req, res) => {
 
 app.delete('/recipes/:id', (req, res) => {
   const recipeId = req.params.id;
-  const sql = 'DELETE FROM recipes WHERE id = ?';
-
-  db.query(sql, [recipeId], (err, result) => {
+  db.query('DELETE FROM recipes WHERE id = ?', [recipeId], (err) => {
     if (err) {
       console.error('❌ Error deleting recipe:', err);
       return res.status(500).json({ error: 'Internal server error' });
@@ -208,7 +204,7 @@ app.put('/recipes/:id', upload.single('image'), (req, res) => {
   const sql = `UPDATE recipes SET ${updateFields.join(', ')} WHERE id = ?`;
   values.push(recipeId);
 
-  db.query(sql, values, (err, result) => {
+  db.query(sql, values, (err) => {
     if (err) {
       console.error('❌ Error updating recipe:', err);
       return res.status(500).json({ error: 'Internal server error' });
@@ -227,7 +223,7 @@ app.get('/recipes/:id', (req, res) => {
       return res.status(500).json({ error: 'Internal server error' });
     }
 
-    if (results.length === 0) {
+    if (!results || results.length === 0) {
       return res.status(404).json({ error: 'Recipe not found' });
     }
 
