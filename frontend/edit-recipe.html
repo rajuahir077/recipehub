@@ -6,8 +6,14 @@
   <title>Edit Recipe - RecipeHub</title>
   <link rel="stylesheet" href="style.css"/>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    button[disabled] { opacity: 0.6; pointer-events: none; }
+    #imagePreview { max-width: 200px; margin-top: 10px; display: none; }
+  </style>
 </head>
+
 <body>
+
 <header class="header">
   <div class="container">
     <div class="nav">
@@ -26,7 +32,8 @@
   <div class="container">
     <h1>Edit Your Recipe 🍽️</h1>
 
-    <form class="recipe-form" enctype="multipart/form-data">
+    <form class="recipe-form" id="editForm" enctype="multipart/form-data">
+
       <input type="text" id="title" class="form-input" placeholder="Recipe Title" required/>
 
       <select id="category" class="form-select" required>
@@ -44,8 +51,13 @@
 
       <textarea id="description" class="form-textarea" rows="3" placeholder="Description"></textarea>
 
+      <h3>Current Image</h3>
+      <img id="currentImage" style="max-width:200px; display:none;">
+      <p id="noImageMsg">No image uploaded</p>
+
+      <h3>Replace Image (optional)</h3>
       <input type="file" id="image" class="form-input" accept="image/*"/>
-      <img id="imagePreview" style="max-width:200px;margin-top:10px;"/>
+      <img id="imagePreview"/>
 
       <h3>Ingredients</h3>
       <div id="ingredients"></div>
@@ -55,92 +67,142 @@
       <div id="instructions"></div>
       <button type="button" class="btn btn-outline" onclick="addStep()">+ Step</button>
 
-      <button type="submit" class="btn btn-success">Update Recipe ✅</button>
+      <button type="submit" id="saveBtn" class="btn btn-success">Update Recipe ✅</button>
     </form>
   </div>
 </main>
 
 <script>
-// URL Params
-const urlParams = new URLSearchParams(window.location.search);
-const recipeId = urlParams.get('id');
+/* ------------------------------
+   BACKEND URL CONFIG
+--------------------------------*/
+const DEFAULT_BACKEND = "https://recipehub-9vlb.onrender.com";
+const API_BASE = (location.hostname === "localhost" || location.hostname === "127.0.0.1")
+  ? "http://localhost:3000"
+  : DEFAULT_BACKEND;
 
-async function loadRecipe(){
+/* ------------------------------
+   GET RECIPE ID FROM URL
+--------------------------------*/
+const params = new URLSearchParams(window.location.search);
+const recipeId = params.get("id");
+
+/* ------------------------------
+   LOAD RECIPE DETAILS
+--------------------------------*/
+async function loadRecipe() {
   try {
-    const res = await fetch(`http://localhost:3000/recipes/${recipeId}`);
+    const res = await fetch(`${API_BASE}/recipes/${recipeId}`);
     if (!res.ok) {
-      const errMsg = await res.json();
-      alert(errMsg.error || 'Failed to load recipe.');
+      alert("Failed to load recipe.");
       return;
     }
 
     const recipe = await res.json();
 
-    document.getElementById('title').value = recipe.title;
-    document.getElementById('category').value = recipe.category;
-    document.getElementById('prepTime').value = recipe.prep_time;
-    document.getElementById('servings').value = recipe.servings;
-    document.getElementById('description').value = recipe.description;
+    // Fill fields
+    title.value = recipe.title;
+    category.value = recipe.category;
+    prepTime.value = recipe.prep_time;
+    servings.value = recipe.servings;
+    description.value = recipe.description;
 
-    document.getElementById('imagePreview').src = recipe.image_url;
+    // Image
+    if (recipe.image_url) {
+      currentImage.src = recipe.image_url.startsWith("http")
+        ? recipe.image_url
+        : API_BASE + recipe.image_url;
+      currentImage.style.display = "block";
+      noImageMsg.style.display = "none";
+    } else {
+      currentImage.style.display = "none";
+    }
 
-    document.getElementById('ingredients').innerHTML = '';
+    // Ingredients
+    ingredients.innerHTML = "";
     recipe.ingredients.forEach(ing => addIngredient(ing));
 
-    document.getElementById('instructions').innerHTML = '';
-    recipe.instructions.forEach(ins => addStep(ins));
+    // Instructions
+    instructions.innerHTML = "";
+    recipe.instructions.forEach(step => addStep(step));
 
   } catch (err) {
-    alert('An error occurred while loading the recipe.');
     console.error(err);
+    alert("Error loading recipe.");
   }
 }
 
-function addIngredient(value=''){
-  const container=document.getElementById('ingredients');
-  const div=document.createElement('div');
-  div.innerHTML=`<input type='text' class='form-input ingredient-input' value="${value}"/>`;
-  container.appendChild(div);
+/* ------------------------------
+   ADD / REMOVE INGREDIENT / STEP
+--------------------------------*/
+function addIngredient(value = "") {
+  const div = document.createElement("div");
+  div.innerHTML = `<input type="text" class="form-input ingredient-input" value="${value}"/>`;
+  ingredients.appendChild(div);
 }
 
-function addStep(value=''){
-  const container=document.getElementById('instructions');
-  const div=document.createElement('div');
-  div.innerHTML=`<textarea class='form-textarea step-input' rows='2'>${value}</textarea>`;
-  container.appendChild(div);
+function addStep(value = "") {
+  const div = document.createElement("div");
+  div.innerHTML = `<textarea class="form-textarea step-input" rows="2">${value}</textarea>`;
+  instructions.appendChild(div);
 }
 
-document.getElementById('image').addEventListener('change', e=>{
-  document.getElementById('imagePreview').src=URL.createObjectURL(e.target.files[0]);
+/* ------------------------------
+   IMAGE PREVIEW
+--------------------------------*/
+image.addEventListener("change", e => {
+  const file = e.target.files[0];
+  if (file) {
+    imagePreview.src = URL.createObjectURL(file);
+    imagePreview.style.display = "block";
+  }
 });
 
-document.querySelector('.recipe-form').addEventListener('submit',async e=>{
+/* ------------------------------
+   SUBMIT UPDATE
+--------------------------------*/
+document.getElementById("editForm").addEventListener("submit", async e => {
   e.preventDefault();
-  const formData=new FormData();
-  formData.append('title',document.getElementById('title').value);
-  formData.append('category',document.getElementById('category').value);
-  formData.append('prepTime',document.getElementById('prepTime').value);
-  formData.append('servings',document.getElementById('servings').value);
-  formData.append('description',document.getElementById('description').value);
-  const image=document.getElementById('image').files[0];
-  if(image) formData.append('image',image);
 
-  const ingredients=[...document.querySelectorAll('.ingredient-input')].map(i=>i.value);
-  formData.append('ingredients',JSON.stringify(ingredients));
-  const instructions=[...document.querySelectorAll('.step-input')].map(i=>i.value);
-  formData.append('instructions',JSON.stringify(instructions));
+  saveBtn.disabled = true;
 
-  const res=await fetch(`http://localhost:3000/recipes/${recipeId}`,{
-    method:'PUT', body:formData
-  });
+  const formData = new FormData();
+  formData.append("title", title.value);
+  formData.append("category", category.value);
+  formData.append("prepTime", prepTime.value);
+  formData.append("servings", servings.value);
+  formData.append("description", description.value);
 
-  if(res.ok){
-    alert('✅ Recipe updated!');
-    location.href='dashboard.html';
-  }else alert('Failed to update recipe.');
+  const imgFile = image.files[0];
+  if (imgFile) formData.append("image", imgFile);
+
+  const ingList = [...document.querySelectorAll(".ingredient-input")].map(i => i.value);
+  formData.append("ingredients", JSON.stringify(ingList));
+
+  const stepList = [...document.querySelectorAll(".step-input")].map(i => i.value);
+  formData.append("instructions", JSON.stringify(stepList));
+
+  try {
+    const res = await fetch(`${API_BASE}/recipes/${recipeId}`, {
+      method: "PUT",
+      body: formData
+    });
+
+    if (res.ok) {
+      alert("Recipe updated successfully!");
+      window.location.href = `view-recipe.html?id=${recipeId}`;
+    } else {
+      const err = await res.json();
+      alert("Update failed: " + err.error);
+    }
+  } catch (err) {
+    alert("Network error.");
+  } finally {
+    saveBtn.disabled = false;
+  }
 });
 
-// Initial load
+/* ------------------------------ */
 loadRecipe();
 </script>
 
@@ -149,5 +211,6 @@ loadRecipe();
     <p>Made with ❤️ RecipeHub</p>
   </div>
 </footer>
+
 </body>
 </html>

@@ -6,6 +6,10 @@
   <title>Login - RecipeHub</title>
   <link rel="stylesheet" href="style.css" />
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    /* tiny inline style for the disabled state */
+    button[disabled] { opacity: 0.6; pointer-events: none; }
+  </style>
 </head>
 <body class="auth-body">
   <!-- Background Floating Emojis -->
@@ -61,7 +65,7 @@
           </div>
         </div>
 
-        <button type="submit" class="btn btn-primary btn-large btn-full">
+        <button id="loginBtn" type="submit" class="btn btn-primary btn-large btn-full">
           Sign In ✨
         </button>
       </form>
@@ -78,32 +82,55 @@
     </div>
   </div>
 
-  <!-- Backend Login Script -->
   <script>
+    // Same logic as signup: local when testing locally, otherwise use deployed Render backend
+    const DEFAULT_RENDER_BACKEND = 'https://recipehub-9vlb.onrender.com'; // <-- change if your Render URL is different
+    const API_BASE_URL = (function () {
+      if (window.API_BASE_URL) return window.API_BASE_URL;
+      const host = location.hostname;
+      if (host === 'localhost' || host === '127.0.0.1') return 'http://localhost:3000';
+      return DEFAULT_RENDER_BACKEND;
+    })();
+
     document.getElementById("loginForm").addEventListener("submit", async (e) => {
       e.preventDefault();
+      const loginBtn = document.getElementById('loginBtn');
+      loginBtn.disabled = true;
 
-      const email = document.getElementById("email").value;
+      const email = document.getElementById("email").value.trim();
       const password = document.getElementById("password").value;
 
       try {
-        const response = await fetch("http://localhost:3000/login", {
+        const res = await fetch(`${API_BASE_URL}/login`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email, password }),
         });
 
-        const result = await response.json();
+        let result = {};
+        try { result = await res.json(); } catch (err) { /* ignore parse error */ }
 
-        if (response.ok) {
-          alert("✅ Login successful! Welcome " + result.user.fullName);
+        if (res.ok) {
+          // Optional: save user info in localStorage if you use it elsewhere
+          try {
+            if (result.user) localStorage.setItem('recipehub_user', JSON.stringify(result.user));
+          } catch (e) { /* ignore storage errors */ }
+
+          alert("✅ Login successful! Welcome " + (result.user?.fullName || ''));
           window.location.href = "dashboard.html";
         } else {
-          alert("❌ " + result.error);
+          const msg = result && (result.error || result.message) ? (result.error || result.message) : `Login failed (status ${res.status})`;
+          alert(msg);
         }
-      } catch (error) {
-        console.error("Login error:", error);
-        alert("❌ An error occurred during login.");
+      } catch (err) {
+        console.error("Login error:", err);
+        if (err.message && (err.message.includes('Failed to fetch') || err.message.includes('NetworkError'))) {
+          alert("Network error: couldn't reach the backend. If you're testing locally, make sure your Node server is running on http://localhost:3000. If using Render, make sure DB is connected and the Render URL is correct.");
+        } else {
+          alert("❌ An error occurred during login.");
+        }
+      } finally {
+        loginBtn.disabled = false;
       }
     });
   </script>

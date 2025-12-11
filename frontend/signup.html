@@ -6,6 +6,10 @@
   <title>Sign Up - RecipeHub</title>
   <link rel="stylesheet" href="style.css" />
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    /* tiny inline style for the disabled state so you don't have to change CSS right now */
+    button[disabled] { opacity: 0.6; pointer-events: none; }
+  </style>
 </head>
 <body class="auth-body">
 
@@ -65,7 +69,7 @@
           </div>
         </div>
 
-        <button type="submit" class="btn btn-success btn-large btn-full">Create Account 🎉</button>
+        <button id="submitBtn" type="submit" class="btn btn-success btn-large btn-full">Create Account 🎉</button>
       </form>
 
       <!-- Footer -->
@@ -82,8 +86,32 @@
   </div>
 
   <script>
+    /**
+     * API base selection logic:
+     * - If you're testing locally (localhost or 127.0.0.1) -> use local backend http://localhost:3000
+     * - Otherwise use your deployed backend on Render. Replace the URL below with your real Render URL if it's different.
+     *
+     * If you later deploy frontend and backend to the same domain, change this logic accordingly.
+     */
+    const DEFAULT_RENDER_BACKEND = 'https://recipehub-9vlb.onrender.com'; // <-- replace if your Render URL is different
+
+    const API_BASE_URL = (function () {
+      // allow overriding via a global variable if you want:
+      if (window.API_BASE_URL) return window.API_BASE_URL;
+
+      const host = location.hostname;
+      if (host === 'localhost' || host === '127.0.0.1') {
+        return 'http://localhost:3000';
+      }
+      // running on the web (not local) -> use the Render backend
+      return DEFAULT_RENDER_BACKEND;
+    })();
+
     document.getElementById("signupForm").addEventListener("submit", async function (e) {
       e.preventDefault();
+
+      const submitBtn = document.getElementById('submitBtn');
+      submitBtn.disabled = true;
 
       const fullName = document.getElementById("fullName").value.trim();
       const email = document.getElementById("email").value.trim();
@@ -92,13 +120,14 @@
 
       if (password !== confirmPassword) {
         alert("Passwords do not match!");
+        submitBtn.disabled = false;
         return;
       }
 
       const user = { fullName, email, password };
 
       try {
-        const response = await fetch("http://localhost:3000/signup", {
+        const response = await fetch(`${API_BASE_URL}/signup`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -106,17 +135,29 @@
           body: JSON.stringify(user),
         });
 
-        const data = await response.json();
+        // try to parse JSON safely
+        let data = {};
+        try { data = await response.json(); } catch (err) { /* ignore parse error */ }
 
         if (response.ok) {
-          alert("Account created successfully!");
+          alert("✅ Account created successfully!");
+          // redirect to login page
           window.location.href = "login.html";
         } else {
-          alert(data.error || "Signup failed.");
+          // Backend returned an error (like 400/500). Show a useful message if available.
+          const msg = data && (data.error || data.message) ? (data.error || data.message) : `Signup failed (status ${response.status})`;
+          alert(msg);
         }
       } catch (err) {
         console.error("Signup error:", err);
-        alert("An error occurred while signing up.");
+        // Helpful message for connection errors
+        if (err.message && (err.message.includes('Failed to fetch') || err.message.includes('NetworkError'))) {
+          alert("Network error: couldn't reach the backend. If you're testing locally, make sure your Node server is running on http://localhost:3000. If using Render, make sure DB is connected and the Render URL is correct.");
+        } else {
+          alert("An error occurred while signing up.");
+        }
+      } finally {
+        submitBtn.disabled = false;
       }
     });
   </script>

@@ -6,6 +6,11 @@
   <title>Add Recipe - RecipeHub</title>
   <link rel="stylesheet" href="style.css" />
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* small convenience */
+    button[disabled] { opacity: 0.6; pointer-events: none; }
+    #imagePreview { max-width: 200px; margin-top: 10px; display: none; }
+  </style>
 </head>
 <body>
   <!-- Header -->
@@ -31,7 +36,7 @@
         <p class="page-subtitle">Help others discover your delicious creation!</p>
       </div>
 
-      <form class="recipe-form" enctype="multipart/form-data">
+      <form class="recipe-form" id="recipeForm" enctype="multipart/form-data">
         <div class="form-section">
           <h2 class="form-section-title">Basic Information</h2>
 
@@ -73,7 +78,7 @@
           <div class="form-group">
             <label for="image" class="form-label">Upload Image</label>
             <input type="file" id="image" name="image" accept="image/*" class="form-input">
-            <img id="imagePreview" style="margin-top:10px; max-width: 200px; display:none;" />
+            <img id="imagePreview" />
           </div>
         </div>
 
@@ -104,7 +109,7 @@
 
         <div class="form-actions">
           <a href="dashboard.html" class="btn btn-outline btn-large">Cancel</a>
-          <button type="submit" class="btn btn-success btn-large">Share Recipe 🎉</button>
+          <button id="submitRecipeBtn" type="submit" class="btn btn-success btn-large">Share Recipe 🎉</button>
         </div>
       </form>
     </div>
@@ -124,6 +129,7 @@
   </footer>
 
 <script>
+  // Small DOM utility functions
   function addIngredient() {
     const container = document.getElementById("ingredients");
     const newItem = document.createElement("div");
@@ -163,6 +169,7 @@
     }
   }
 
+  // Image preview
   document.getElementById("image").addEventListener("change", function () {
     const preview = document.getElementById("imagePreview");
     const file = this.files[0];
@@ -174,8 +181,20 @@
     }
   });
 
-  document.querySelector(".recipe-form").addEventListener("submit", async function (e) {
+  // API base logic (local vs deployed)
+  const DEFAULT_RENDER_BACKEND = 'https://recipehub-9vlb.onrender.com'; // change if different
+  const API_BASE_URL = (function () {
+    if (window.API_BASE_URL) return window.API_BASE_URL;
+    const host = location.hostname;
+    if (host === 'localhost' || host === '127.0.0.1') return 'http://localhost:3000';
+    return DEFAULT_RENDER_BACKEND;
+  })();
+
+  // Form submit
+  document.getElementById("recipeForm").addEventListener("submit", async function (e) {
     e.preventDefault();
+    const submitBtn = document.getElementById("submitRecipeBtn");
+    submitBtn.disabled = true;
 
     const formData = new FormData();
     formData.append("title", document.getElementById("title").value.trim());
@@ -196,21 +215,29 @@
     formData.append("instructions", JSON.stringify(instructions));
 
     try {
-      const response = await fetch("http://localhost:3000/recipes", {
+      const response = await fetch(`${API_BASE_URL}/recipes`, {
         method: "POST",
         body: formData
       });
 
-      const data = await response.json();
+      let data = {};
+      try { data = await response.json(); } catch (_) { /* ignore parse error */ }
+
       if (response.ok) {
         alert("✅ Recipe submitted successfully!");
         window.location.href = "dashboard.html";
       } else {
-        alert(data.error || "Failed to submit recipe.");
+        alert(data.error || data.message || `Failed to submit recipe (status ${response.status})`);
       }
     } catch (err) {
       console.error("Error submitting recipe:", err);
-      alert("An error occurred. Please try again.");
+      if (err.message && (err.message.includes('Failed to fetch') || err.message.includes('NetworkError'))) {
+        alert("Network error: couldn't reach the backend. If you're testing locally, ensure your server is running on http://localhost:3000. If using Render, check the Render logs.");
+      } else {
+        alert("An error occurred. Please try again.");
+      }
+    } finally {
+      submitBtn.disabled = false;
     }
   });
 </script>

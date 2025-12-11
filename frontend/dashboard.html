@@ -6,6 +6,13 @@
   <title>Dashboard - RecipeHub</title>
   <link rel="stylesheet" href="style.css" />
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    /* small convenience */
+    .recipe-grid .recipe-card { transition: transform .08s ease; }
+    .recipe-grid .recipe-card:hover { transform: translateY(-4px); }
+    .btn[disabled] { opacity: 0.6; pointer-events: none; }
+    .placeholder-img { width:100%; height:180px; background:#eee; display:flex; align-items:center; justify-content:center; color:#999; font-size:18px; }
+  </style>
 </head>
 <body>
 
@@ -61,9 +68,7 @@
         <h2 class="section-title">Popular Recipes 🔥</h2>
         <div class="recipe-grid">
 
-          <!-- 6 Fixed Recipe Cards -->
-          <!-- (unchanged) -->
-
+          <!-- 6 Fixed Recipe Cards (kept as-is) -->
           <div class="recipe-card">
             <div class="recipe-image">
               <img src="assets/Fluffy Pancakes.jpg" alt="Fluffy Pancakes" />
@@ -189,74 +194,122 @@
 
   <!-- Load Community Recipes from Backend -->
   <script>
+    // Local vs deployed backend selection
+    const DEFAULT_RENDER_BACKEND = 'https://recipehub-9vlb.onrender.com'; // change if different
+    const API_BASE_URL = (function () {
+      if (window.API_BASE_URL) return window.API_BASE_URL;
+      const host = location.hostname;
+      if (host === 'localhost' || host === '127.0.0.1') return 'http://localhost:3000';
+      return DEFAULT_RENDER_BACKEND;
+    })();
 
-    /*Added by Raj*/
     function getCategoryTag(category) {
-  const categoryClass = category.toLowerCase();
-  return `<div class="recipe-category ${categoryClass}">${category}</div>`;
-}
+      const categoryClass = category ? category.toLowerCase() : 'other';
+      const safeName = category ? category.charAt(0).toUpperCase() + category.slice(1) : 'Other';
+      return `<div class="recipe-category ${categoryClass}">${safeName}</div>`;
+    }
 
-  fetch('http://localhost:3000/recipes')
-    .then(response => response.json())
-    .then(data => {
+    function safeImageUrl(imageUrl) {
+      if (!imageUrl) return null;
+      // if imageUrl is already absolute, return it; else prefix with API_BASE_URL
+      if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) return imageUrl;
+      // ensure leading slash
+      if (!imageUrl.startsWith('/')) imageUrl = '/' + imageUrl;
+      return API_BASE_URL + imageUrl;
+    }
+
+    async function loadCommunityRecipes() {
       const container = document.getElementById('community-recipes');
-      if (data.length === 0) {
-        container.innerHTML = "<p>No community recipes found.</p>";
-        return;
+      container.innerHTML = '<p>Loading community recipes…</p>';
+      try {
+        const res = await fetch(`${API_BASE_URL}/recipes`);
+        if (!res.ok) {
+          container.innerHTML = '<p>⚠️ Failed to load community recipes.</p>';
+          console.error('Failed to fetch recipes', res.status);
+          return;
+        }
+        const data = await res.json();
+        container.innerHTML = '';
+        if (!data || data.length === 0) {
+          container.innerHTML = "<p>No community recipes found.</p>";
+          return;
+        }
+
+        data.forEach(recipe => {
+          const card = document.createElement('div');
+          card.className = 'recipe-card';
+          const imgUrl = safeImageUrl(recipe.image_url);
+          const imageHtml = imgUrl
+            ? `<img src="${imgUrl}" alt="${escapeHtml(recipe.title)}" />`
+            : `<div class="placeholder-img">No image</div>`;
+
+          card.innerHTML = `
+            <a href="view-recipe.html?id=${recipe.id}" style="text-decoration: none; color: inherit;">
+              <div class="recipe-image">
+                ${imageHtml}
+                ${getCategoryTag(recipe.category)}
+              </div>
+              <div class="recipe-content">
+                <h3 class="recipe-title">${escapeHtml(recipe.title)}</h3>
+                <p class="recipe-description">${escapeHtml(recipe.description || '')}</p>
+                <div class="recipe-meta">
+                  <span class="recipe-time">⏱️ ${recipe.prep_time || 0} min</span>
+                </div>
+                <div class="recipe-author"><span>by Community</span></div>
+              </div>
+            </a>
+            <div class="recipe-actions">
+              <button class="btn btn-danger" data-id="${recipe.id}">🗑️ Delete</button>
+              <a href="edit-recipe.html?id=${recipe.id}" class="btn btn-primary">✏️ Edit</a>
+            </div>
+          `;
+          container.appendChild(card);
+        });
+
+        // attach delete handlers (delegation)
+        container.addEventListener('click', async function (e) {
+          if (e.target && e.target.matches('.btn-danger')) {
+            const btn = e.target;
+            const id = btn.getAttribute('data-id');
+            if (!confirm('Are you sure you want to delete this recipe?')) return;
+            btn.disabled = true;
+            try {
+              const delRes = await fetch(`${API_BASE_URL}/recipes/${id}`, { method: 'DELETE' });
+              if (delRes.ok) {
+                btn.closest('.recipe-card').remove();
+                alert('✅ Recipe deleted!');
+              } else {
+                alert('❌ Failed to delete recipe.');
+              }
+            } catch (err) {
+              console.error('Error deleting recipe', err);
+              alert('❌ Error deleting recipe.');
+            } finally {
+              btn.disabled = false;
+            }
+          }
+        });
+
+      } catch (err) {
+        console.error('❌ Error fetching recipes:', err);
+        container.innerHTML = '<p>⚠️ Failed to load community recipes.</p>';
       }
+    }
 
-      data.forEach(recipe => {
-        const card = document.createElement('div');
-        card.className = 'recipe-card';
-        card.innerHTML = `
-  <a href="view-recipe.html?id=${recipe.id}" style="text-decoration: none; color: inherit;">
-    <div class="recipe-image">
-      <img src="http://localhost:3000${recipe.image_url}" alt="${recipe.title}" />
-      ${getCategoryTag(recipe.category)}
-    </div>
-    <div class="recipe-content">
-      <h3 class="recipe-title">${recipe.title}</h3>
-      <p class="recipe-description">${recipe.description}</p>
-      <div class="recipe-meta">
-        <span class="recipe-time">⏱️ ${recipe.prep_time} min</span>
-      </div>
-      <div class="recipe-author"><span>by Community</span></div>
-    </div>
-  </a>
-  <div class="recipe-actions">
-    <button class="btn btn-danger" onclick="deleteRecipe(${recipe.id}, this)">🗑️ Delete</button>
-    <a href="edit-recipe.html?id=${recipe.id}" class="btn btn-primary">✏️ Edit</a>
-  </div>
-`;
-        container.appendChild(card);
-      });
-    })
-    .catch(error => {
-      document.getElementById('community-recipes').innerHTML = "<p>⚠️ Failed to load community recipes.</p>";
-      console.error('❌ Error fetching recipes:', error);
-    });
+    // simple HTML escape to avoid injection when inserting text
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
 
-  function deleteRecipe(id, btn) {
-    if (!confirm("Are you sure you want to delete this recipe?")) return;
-
-    fetch(`http://localhost:3000/recipes/${id}`, {
-      method: 'DELETE'
-    })
-    .then(response => {
-      if (response.ok) {
-        const card = btn.closest('.recipe-card');
-        card.remove();
-        alert("✅ Recipe deleted!");
-      } else {
-        alert("❌ Failed to delete recipe.");
-      }
-    })
-    .catch(error => {
-      console.error("❌ Error deleting recipe:", error);
-      alert("❌ Error deleting recipe.");
-    });
-  }
-</script>
+    // load recipes on page load
+    loadCommunityRecipes();
+  </script>
 
 </body>
 </html>
