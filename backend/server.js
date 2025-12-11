@@ -6,13 +6,13 @@ const multer = require('multer');
 const path = require('path');
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000; // use Render port in production
 
 app.use(cors());
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Configure Multer for image uploads
+// Configure Multer for image uploads (works locally; note: Render's filesystem is ephemeral)
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, 'uploads/');
@@ -24,23 +24,34 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-// MySQL connection
-const db = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: '03062001@Raju',
-  database: 'recipehub'
-});
+// ---------- DATABASE CONNECTION ----------
+// Prefer DB_URL from environment (set this in Render -> Environment Variables).
+// Fallback to local connection for development.
+const dbUrl = process.env.DB_URL;
+
+let db;
+if (dbUrl) {
+  db = mysql.createConnection(dbUrl);
+  console.log('Using DB_URL from environment.');
+} else {
+  db = mysql.createConnection({
+    host: 'localhost',
+    user: 'root',
+    password: '03062001@Raju',
+    database: 'recipehub'
+  });
+  console.log('Using local MySQL config.');
+}
 
 db.connect(err => {
   if (err) {
-    console.error('❌ Database connection failed:', err.stack);
-    return;
+    console.error('❌ Database connection failed:', err);
+  } else {
+    console.log('✅ Connected to MySQL database.');
   }
-  console.log('✅ Connected to MySQL database.');
 });
 
-// Get all recipes
+// ---------- ROUTES ----------
 app.get('/recipes', (req, res) => {
   db.query('SELECT * FROM recipes', (err, results) => {
     if (err) {
@@ -51,7 +62,6 @@ app.get('/recipes', (req, res) => {
   });
 });
 
-// Add a new recipe with image upload
 app.post('/recipes', upload.single('image'), (req, res) => {
   const {
     title,
@@ -92,7 +102,6 @@ app.post('/recipes', upload.single('image'), (req, res) => {
   );
 });
 
-// Signup Route
 app.post('/signup', async (req, res) => {
   const { fullName, email, password } = req.body;
 
@@ -122,7 +131,6 @@ app.post('/signup', async (req, res) => {
   }
 });
 
-// Login Route
 app.post('/login', (req, res) => {
   const { email, password } = req.body;
 
@@ -154,7 +162,6 @@ app.post('/login', (req, res) => {
   });
 });
 
-//delete recipe
 app.delete('/recipes/:id', (req, res) => {
   const recipeId = req.params.id;
   const sql = 'DELETE FROM recipes WHERE id = ?';
@@ -168,7 +175,6 @@ app.delete('/recipes/:id', (req, res) => {
   });
 });
 
-// Update an existing recipe by ID
 app.put('/recipes/:id', upload.single('image'), (req, res) => {
   const recipeId = req.params.id;
   const {
@@ -211,9 +217,7 @@ app.put('/recipes/:id', upload.single('image'), (req, res) => {
   });
 });
 
-  /**Added Part */
-  // Get a single recipe by ID
-// Improved GET /recipes/:id route with correct column names
+// Get a single recipe by ID
 app.get('/recipes/:id', (req, res) => {
   const recipeId = req.params.id;
 
@@ -253,7 +257,6 @@ app.get('/recipes/:id', (req, res) => {
     });
   });
 });
-
 
 app.listen(port, () => {
   console.log(`🚀 Server running at: http://localhost:${port}`);
