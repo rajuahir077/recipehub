@@ -48,7 +48,7 @@
     const API_BASE = (function(){
       if (window.API_BASE_URL) return window.API_BASE_URL;
       const host = location.hostname;
-      if (host === 'localhost' || host === '127.0.0.1') return 'http://localhost:3000';
+      if (host === 'localhost' || host === '127.0.0.1') return 'https://recipehub-9vlb.onrender.com';
       return DEFAULT_RENDER_BACKEND;
     })();
 
@@ -163,3 +163,4 @@
   </script>
 </body>
 </html>
+

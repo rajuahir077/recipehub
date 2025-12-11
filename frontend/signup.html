@@ -88,7 +88,7 @@
   <script>
     /**
      * API base selection logic:
-     * - If you're testing locally (localhost or 127.0.0.1) -> use local backend http://localhost:3000
+     * - If you're testing locally (localhost or 127.0.0.1) -> use local backend https://recipehub-9vlb.onrender.com
      * - Otherwise use your deployed backend on Render. Replace the URL below with your real Render URL if it's different.
      *
      * If you later deploy frontend and backend to the same domain, change this logic accordingly.
@@ -101,7 +101,7 @@
 
       const host = location.hostname;
       if (host === 'localhost' || host === '127.0.0.1') {
-        return 'http://localhost:3000';
+        return 'https://recipehub-9vlb.onrender.com';
       }
       // running on the web (not local) -> use the Render backend
       return DEFAULT_RENDER_BACKEND;
@@ -152,7 +152,7 @@
         console.error("Signup error:", err);
         // Helpful message for connection errors
         if (err.message && (err.message.includes('Failed to fetch') || err.message.includes('NetworkError'))) {
-          alert("Network error: couldn't reach the backend. If you're testing locally, make sure your Node server is running on http://localhost:3000. If using Render, make sure DB is connected and the Render URL is correct.");
+          alert("Network error: couldn't reach the backend. If you're testing locally, make sure your Node server is running on https://recipehub-9vlb.onrender.com. If using Render, make sure DB is connected and the Render URL is correct.");
         } else {
           alert("An error occurred while signing up.");
         }
@@ -163,3 +163,4 @@
   </script>
 </body>
 </html>
+

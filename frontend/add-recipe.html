@@ -186,7 +186,7 @@
   const API_BASE_URL = (function () {
     if (window.API_BASE_URL) return window.API_BASE_URL;
     const host = location.hostname;
-    if (host === 'localhost' || host === '127.0.0.1') return 'http://localhost:3000';
+    if (host === 'localhost' || host === '127.0.0.1') return 'https://recipehub-9vlb.onrender.com';
     return DEFAULT_RENDER_BACKEND;
   })();
 
@@ -232,7 +232,7 @@
     } catch (err) {
       console.error("Error submitting recipe:", err);
       if (err.message && (err.message.includes('Failed to fetch') || err.message.includes('NetworkError'))) {
-        alert("Network error: couldn't reach the backend. If you're testing locally, ensure your server is running on http://localhost:3000. If using Render, check the Render logs.");
+        alert("Network error: couldn't reach the backend. If you're testing locally, ensure your server is running on https://recipehub-9vlb.onrender.com. If using Render, check the Render logs.");
       } else {
         alert("An error occurred. Please try again.");
       }
@@ -244,3 +244,4 @@
 
 </body>
 </html>
+

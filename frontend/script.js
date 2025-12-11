@@ -11,7 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const recipe = { title, ingredients, instructions };
 
     try {
-      const response = await fetch("http://localhost:3000/recipes", {
+      const response = await fetch("https://recipehub-9vlb.onrender.com/recipes", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -47,3 +47,4 @@ document.addEventListener("DOMContentLoaded", () => {
 
   });
 });
+
